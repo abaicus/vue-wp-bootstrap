@@ -1,0 +1,71 @@
+{
+  "name": "{{ name }}",
+  "version": "{{ version }}",
+  "description": "{{ description }}",
+  "author": "{{ author }}",
+  "scripts": {
+    "build": "npm-run-all --parallel build:js build:css",
+    "dev": "npm-run-all --parallel watch:js{{#lint}} watch:eslint{{/lint}} watch:css",
+    {{#lint}}
+    "lint": "eslint --ext .js,.vue assets/src",
+    "watch:eslint": "esw -w --ext .js,.vue assets/src --color",
+    {{/lint}}
+    "watch:js": "cross-env NODE_ENV=development webpack --watch --progress --hide-modules",
+    "watch:css": "./node_modules/.bin/node-sass --watch assets/scss -o assets/css --source-map true",
+    "build:js": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "phpcbf": "composer run-script format || true ",
+    "phpcs": "composer run-script phpcs",
+    "build:css": "node-sass assets/scss -o assets/css"{{#commitlint}},
+    "git:add": "git add assets/**/*",
+    "pre-commit": "npm-run-all phpcbf phpcs lint build git:add"
+    {{/commitlint}}
+  },
+  {{#if_eq build "standalone"}}
+  "browser": {
+    "vue": "vue/dist/vue.common.js"
+  },
+  {{/if_eq}}
+  "dependencies": {
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    {{#commitlint}}
+    "@commitlint/cli": "^7.2.1",
+    "@commitlint/config-conventional": "^7.1.2",
+    {{/commitlint}}
+    "cross-env": "^3.2.4",
+    "css-loader": "^0.28.7",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^1.1.4",
+    "style-loader": "^0.23.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "vue-loader": "^14.2.4",
+    "vue-template-compiler": "^2.4.4",
+    {{#lint}}
+    "eslint": "^3.3.0",
+    "eslint-config-standard": "^5.3.5",
+    "eslint-plugin-html": "^1.5.2",
+    "eslint-plugin-promise": "^2.0.1",
+    "eslint-plugin-standard": "^2.0.0",
+    "eslint-watch": "^5.0.1",
+    {{/lint}}
+    {{#commitlint}}
+    "husky": "^1.2.0",
+    {{/commitlint}}
+    "node-sass": "^4.11.0",
+    "npm-run-all": "^2.3.0",
+    "webpack": "^3.12.0"
+  }{{#commitlint}},
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run pre-commit",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+  {{/commitlint}}
+}
